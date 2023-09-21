@@ -2,6 +2,20 @@ from pptx import Presentation
 from pptx.util import Inches
 import os
 
+
+def texto_a_presentacion(texto, slides):
+    # Implementa la lógica para convertir el texto a una presentación.
+    print("Texto a presentación")
+    print("Texto:", texto)
+    print("Slides:", slides)
+
+def pdf_a_presentacion(texto, slides):
+    # Implementa la lógica para convertir el texto del PDF a una presentación.
+    print("PDF a presentación")
+    print("Texto:", texto)
+    print("Slides:", slides)
+
+
 # Supón que info es la información procesada obtenida del LLM
 info = [
     {"title": "Slide 1", "content": "Contenido del Slide 1", "image": "D:\AI\INFOTEP_3CASOS\PPT\PPT.LLM\imagen1.png"},
