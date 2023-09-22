@@ -162,3 +162,5 @@ cython_debug/
 #Mis ignore 
 
 RESULTADO/
+talking_chatgpt_2.py
+talking_chatgpt.py

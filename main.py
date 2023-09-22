@@ -1,32 +1,34 @@
-import pptllm  # Importa el módulo pptllm.py que necesitas crear.
+import creappt  # Importa el módulo pptllm.py que necesitas crear.
+import PyPDF2
+import re
+from prompt2text import *
+from creappt import crear_presentacion 
 
 def menu():
     print("1. Texto a presentación")
     print("2. Pdf a presentación")
     print("3. Salir")
 
+def opcion_1():
+    texto = input("Ingresa el tema: ")
+    slides = int(input("Ingresa la cantidad de slides: "))
+    dataslide = cadena({'tema':texto, 'cantidad': slides})
+    print(dataslide) 
+    print("\n"*2)
+    input("Presiona enter para generar presentación con el texto mostrado...")
+    crear_presentacion(dataslide)
+
+
 def limpiar_texto(texto):
     # Limpia el texto de caracteres no deseados y lo retorna.
     # Puedes ajustar esto para que se ajuste a tus necesidades.
-    import re
     pattern = re.compile('[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,?!¡¿ ]')
     texto_limpio = pattern.sub('', texto)
     return texto_limpio
 
-def opcion_1():
-    texto = input("Ingresa el texto: ")
-    slides = int(input("Ingresa la cantidad de slides: "))
-    pptllm.texto_a_presentacion(texto, slides)
-
-def opcion_2():
-    ruta_pdf = input("Ingresa la ruta del PDF: ")
-    slides = int(input("Ingresa la cantidad de slides: "))
-    # Lee y limpia el contenido del PDF.
-    texto = leer_y_limpiar_pdf(ruta_pdf)
-    pptllm.pdf_a_presentacion(texto, slides)
 
 def leer_y_limpiar_pdf(ruta_pdf):
-    import PyPDF2
+
     texto = ""
     try:
         with open(ruta_pdf, 'rb') as file:
@@ -37,6 +39,14 @@ def leer_y_limpiar_pdf(ruta_pdf):
     except FileNotFoundError:
         print("Archivo no encontrado")
     return texto
+
+def opcion_2():
+    ruta_pdf = input("Ingresa la ruta del PDF: ")
+    slides = int(input("Ingresa la cantidad de slides: "))
+    # Lee y limpia el contenido del PDF.
+    texto = leer_y_limpiar_pdf(ruta_pdf)
+    creappt.pdf_a_presentacion(texto, slides)
+
 
 def main():
     while True:
