@@ -164,3 +164,4 @@ cython_debug/
 RESULTADO/
 talking_chatgpt_2.py
 talking_chatgpt.py
+apikey.py
