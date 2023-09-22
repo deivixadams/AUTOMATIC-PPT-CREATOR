@@ -7,9 +7,11 @@ from creappt import crear_presentacion
 def menu():
     print("1. Texto a presentación")
     print("2. Pdf a presentación")
-    print("3. Salir")
+    print("3. Web a presentación")
+    print("4. word a presentación")
+    print("5. Salir")
 
-def opcion_1():
+def Texto_a_presentacion():
     texto = input("Ingresa el tema: ")
     slides = int(input("Ingresa la cantidad de slides: "))
     dataslide = cadena({'tema':texto, 'cantidad': slides})
@@ -40,12 +42,18 @@ def leer_y_limpiar_pdf(ruta_pdf):
         print("Archivo no encontrado")
     return texto
 
-def opcion_2():
+def Pdf_a_presentacion():
     ruta_pdf = input("Ingresa la ruta del PDF: ")
     slides = int(input("Ingresa la cantidad de slides: "))
     # Lee y limpia el contenido del PDF.
     texto = leer_y_limpiar_pdf(ruta_pdf)
     creappt.pdf_a_presentacion(texto, slides)
+
+def Web_a_presentacion():
+    pass
+
+def word_a_presentacion():
+    pass
 
 
 def main():
@@ -53,10 +61,14 @@ def main():
         menu()
         opcion = input("Selecciona una opción: ")
         if opcion == '1':
-            opcion_1()
+            Texto_a_presentacion()
         elif opcion == '2':
-            opcion_2()
+            Pdf_a_presentacion()
         elif opcion == '3':
+            Web_a_presentacion()
+        elif opcion == '4':
+            word_a_presentacion()
+        elif opcion == '5':
             break
         else:
             print("Opción inválida")
