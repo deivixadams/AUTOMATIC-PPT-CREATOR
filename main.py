@@ -1,77 +1,59 @@
-import creappt  # Importa el módulo pptllm.py que necesitas crear.
-import PyPDF2
-import re
-from prompt2text import *
-from creappt import crear_presentacion 
-
-def menu():
-    print("1. Texto a presentación")
-    print("2. Pdf a presentación")
-    print("3. Web a presentación")
-    print("4. word a presentación")
-    print("5. Salir")
-
-def Texto_a_presentacion():
-    texto = input("Ingresa el tema: ")
-    slides = int(input("Ingresa la cantidad de slides: "))
-    dataslide = cadena({'tema':texto, 'cantidad': slides})
-    print(dataslide) 
-    print("\n"*2)
-    input("Presiona enter para generar presentación con el texto mostrado...")
-    crear_presentacion(dataslide)
+import tools
+from tools import PresentationCreator, PDFReader, InfoConverter
+from texto_presentacion import TextoPresentacion  
 
 
-def limpiar_texto(texto):
-    # Limpia el texto de caracteres no deseados y lo retorna.
-    # Puedes ajustar esto para que se ajuste a tus necesidades.
-    pattern = re.compile('[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,?!¡¿ ]')
-    texto_limpio = pattern.sub('', texto)
-    return texto_limpio
+class Application:
+    def __init__(self):
+        self.presentation_creator = PresentationCreator() # Create an instance of the PresentationCreator class
+        self.pdf_reader = PDFReader()
+        self.texto_presentacion = TextoPresentacion(api_key=tools.API_KEY)  # Replace with actual API_KEY or a way to input it.
+        self.info_converter = InfoConverter() # Create an instance of the InfoConverter class
+    
+    def menu(self):
+        print("1. Texto a presentación")
+        print("2. Pdf a presentación")
+        print("3. Web a presentación")
+        print("4. Word a presentación")
+        print("5. Salir")
+    
+    def texto_a_presentacion(self):
+        texto = input("Ingresa el tema: ")
+        slides = int(input("Ingresa la cantidad de slides: "))
+        #tomo el texto que envia texto_presentacion.cadena y lo convierto a una lista de python con el metodo convertir_info
+        dataslide = self.info_converter.convertir_info(self.texto_presentacion.cadena({'tema': texto, 'cantidad': slides}))
+        #ahora lo ponemos la cantidad de slides que el usuario ingreso
+        dataslide = list(dataslide)[:slides] # convertir a lista y tomar los primeros slides
+        print(type(dataslide))
+        print(dataslide)
+        input("Presiona enter para generar presentación con el texto mostrado...")
+        self.presentation_creator.crear_presentacion(dataslide)
+        
+    
+    def web_a_presentacion(self):
+        pass  # Implement the logic here
+    
+    def word_a_presentacion(self):
+        pass  # Implement the logic here
+    
+    def run(self):
+        while True:
+            self.menu()
+            opcion = input("Selecciona una opción: ")
+            if opcion == '1':
+                self.texto_a_presentacion()
+            elif opcion == '2':
+                self.pdf_a_presentacion()
+            elif opcion == '3':
+                self.web_a_presentacion()
+            elif opcion == '4':
+                self.word_a_presentacion()
+            elif opcion == '5':
+                break
+            else:
+                print("Opción inválida")
 
-
-def leer_y_limpiar_pdf(ruta_pdf):
-
-    texto = ""
-    try:
-        with open(ruta_pdf, 'rb') as file:
-            reader = PyPDF2.PdfReader(file)
-            for page_num in range(len(reader.pages)):
-                texto += reader.pages[page_num].extract_text()
-        texto = limpiar_texto(texto)
-    except FileNotFoundError:
-        print("Archivo no encontrado")
-    return texto
-
-def Pdf_a_presentacion():
-    ruta_pdf = input("Ingresa la ruta del PDF: ")
-    slides = int(input("Ingresa la cantidad de slides: "))
-    # Lee y limpia el contenido del PDF.
-    texto = leer_y_limpiar_pdf(ruta_pdf)
-    creappt.pdf_a_presentacion(texto, slides)
-
-def Web_a_presentacion():
-    pass
-
-def word_a_presentacion():
-    pass
-
-
-def main():
-    while True:
-        menu()
-        opcion = input("Selecciona una opción: ")
-        if opcion == '1':
-            Texto_a_presentacion()
-        elif opcion == '2':
-            Pdf_a_presentacion()
-        elif opcion == '3':
-            Web_a_presentacion()
-        elif opcion == '4':
-            word_a_presentacion()
-        elif opcion == '5':
-            break
-        else:
-            print("Opción inválida")
 
 if __name__ == "__main__":
-    main()
+    app = Application() # Create an instance of the Application class
+    app.run() # Run the application

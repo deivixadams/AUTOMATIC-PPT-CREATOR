@@ -162,6 +162,7 @@ cython_debug/
 #Mis ignore 
 
 RESULTADO/
+BORRAME/
 talking_chatgpt_2.py
 talking_chatgpt.py
 apikey.py
