@@ -17,6 +17,7 @@ from langchain.chains import LLMChain, SimpleSequentialChain
 import re
 import requests
 from bs4 import BeautifulSoup
+import fitz  # fitz es el módulo principal de PyMuPDF
 
 
 
@@ -96,57 +97,56 @@ class PresentationCreator:
             print("No se pudo crear el archivo, probablemente esté abierto.")
 
 
-class LeerPDF:
 
+#procesando el pdf
+class ExtractorTextoPDF:
+    def __init__(self, ruta_del_pdf: str, paginas: str):
+        self.ruta_del_pdf = ruta_del_pdf
+        self.texto = ""
+        self.paginas = self.parsear_paginas(paginas)
+        self.extraer_texto()
 
-
-    def leer_y_limpiar_pdf(self, ruta_pdf):
-        texto = ""
-        try:
-            with open(ruta_pdf, 'rb') as file:
-                reader = PdfReader(file)
-                for page_num in range(len(reader.pages)):
-                    texto += reader.pages[page_num].extract_text()
-            texto = self.limpiar_texto(texto)
-        except FileNotFoundError:
-            print("Archivo no encontrado")
-        return texto
         
-    def pdf_a_presentacion(self):
-        ruta_pdf = input("Ingresa la ruta del PDF: ")
-        slides = int(input("Ingresa la cantidad de slides: "))
-        texto = self.leer_y_limpiar_pdf(ruta_pdf)
-        self.presentation_creator.crear_presentacion(texto, slides)
-    
-    def leer_libro(self, file_path):
-        if not os.path.isfile(file_path):
-            print("Error: Libro no encontrado, por favor vuelva a cargar")
-            return
-        nltk.download('punkt')
+    def parsear_paginas(self, paginas: str):
+        # Convertir la cadena de paginas en una lista de enteros
+        lista_paginas = []
+        for x in paginas.split(','):
+            if '-' in x:
+                inicio, fin = map(int, x.split('-'))
+                lista_paginas.extend(range(inicio, fin + 1))
+            else:
+                lista_paginas.append(int(x))
+        return sorted(set(lista_paginas))
+        
+    def extraer_texto(self):
         try:
-            with open(file_path, "rb") as f:
-                pdf_reader = PdfReader(f)
-                text = ""
-                num_paginas = len(pdf_reader.pages)
-                if num_paginas <= 10:
-                    cant_paginas_para_parrafo = 1
-                else:
-                    cant_paginas_para_parrafo = 10
-
-                for page_num in range(len(pdf_reader.pages))[:10]:
-                    text += pdf_reader.pages[page_num].extract_text()
-                tokens = nltk.sent_tokenize(text)
-                num_parrafos = int(num_paginas / cant_paginas_para_parrafo)
+            doc = fitz.open(self.ruta_del_pdf)
+            
+            for num_pagina in self.paginas:
+                if num_pagina > doc.page_count:
+                    print(f"La página {num_pagina} no existe")
+                    continue
                 
-                for i in range(num_parrafos):
-                    inicio = i * cant_paginas_para_parrafo
-                    fin = inicio + cant_paginas_para_parrafo
-                    texto_parrafo = "".join(tokens[inicio:fin])
-                    print(f"Párrafo {i+1}:\n{texto_parrafo}\n")
-        except FileNotFoundError:
-            print("Error: Libro no encontrado, por favor vuelva a cargar")
+                try:
+                    pagina = doc.load_page(num_pagina - 1)  # -1 porque las páginas en PyMuPDF comienzan desde 0
+                    self.texto += pagina.get_text()
+                except Exception as e:
+                    print(f"La página {num_pagina} no se puede extraer: {str(e)}")
+                    
+            doc.close()
+            
+        except Exception as e:
+            print(f"Ocurrió un error al intentar abrir el PDF: {e}")
 
+        #print(f"text PDF-------> {self.texto}")
+        #input("Presione enter para continuar")
+        return self.texto    
 
+    '''
+    def obtener_texto(self) -> str:
+        print(f"text PDF-------> {self.texto}")
+        return self.texto
+    '''
 
 
 #procesando la url
