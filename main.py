@@ -51,10 +51,17 @@ class Application:
         dataslide = self.info_converter.convertir_info(self.cadena({'tema': texto, 'cantidad': slides}))
         #ahora lo ponemos la cantidad de slides que el usuario ingreso
         dataslide = list(dataslide)[:slides] # convertir a lista y tomar los primeros slides
-        print(type(dataslide))
+        #print(type(dataslide))
+        print("_"*50)
+        print("\n")
+        print("Este es el texto que usaremos en la presentación: \n")
         print(dataslide)
-        input("Presiona enter para generar presentación con el texto mostrado...")
-        self.presentation_creator.crear_presentacion(dataslide)
+        print("\n"*2)
+        estadeacuerdo = input("¿Está de acuerdo con el texto? (s/n):")
+        if estadeacuerdo == 's':
+            self.presentation_creator.crear_presentacion(dataslide)
+        else:
+            self.texto_a_presentacion() 
         
    
     def pdf_a_presentacion(self):
