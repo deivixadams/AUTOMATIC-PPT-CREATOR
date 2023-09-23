@@ -3,7 +3,7 @@ import json
 import os
 import re
 import nltk
-from PyPDF2 import PdfReader
+from PyPDF2 import PdfReader # importamos la clase PdfReader
 from pptx import Presentation
 from pptx.util import Inches
 from datetime import datetime
@@ -14,12 +14,14 @@ from langchain.chat_models import ChatOpenAI
 from langchain import PromptTemplate
 from langchain.llms import OpenAI
 from langchain.chains import LLMChain, SimpleSequentialChain
+import re
+import requests
+from bs4 import BeautifulSoup
+
 
 
 API_KEY = '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'
 SERPER_KEY = 'e8644d7bc36c8d548e0a3e8813a8827d3083933f09fb742a784cbcce84e0f901'
-
-
 
 class LimpiaTexto:
     def limpiar_texto(self, texto):
@@ -29,6 +31,7 @@ class LimpiaTexto:
 
 
 class openai_langchain:
+    
     def openai_lc(self):
         self.llm = ChatOpenAI(
             model_name="gpt-3.5-turbo",
@@ -38,6 +41,20 @@ class openai_langchain:
             model_kwargs={"top_p": 0.9, "frequency_penalty": 0.4}
         )
         return self.llm
+    
+    def completion(texto):
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=
+            [
+                {
+                    "role" : "user", 
+                    "content" : texto            
+                }
+            ]
+        )
+        
+        return completion.choices[0].message["content"].strip()
 
 
 class InfoConverter:
@@ -74,17 +91,20 @@ class PresentationCreator:
         try:
             prs.save(ruta_guardado)
             if os.path.exists(ruta_guardado):
-                print(f"He creado el archivo:{fecha_hora}")
+                print(f"He creado el archivo:{fecha_hora} \n")
         except PermissionError:
             print("No se pudo crear el archivo, probablemente esté abierto.")
 
 
-class PDFReader:
+class LeerPDF:
+
+
+
     def leer_y_limpiar_pdf(self, ruta_pdf):
         texto = ""
         try:
             with open(ruta_pdf, 'rb') as file:
-                reader = PyPDF2.PdfReader(file)
+                reader = PdfReader(file)
                 for page_num in range(len(reader.pages)):
                     texto += reader.pages[page_num].extract_text()
             texto = self.limpiar_texto(texto)
@@ -125,3 +145,45 @@ class PDFReader:
                     print(f"Párrafo {i+1}:\n{texto_parrafo}\n")
         except FileNotFoundError:
             print("Error: Libro no encontrado, por favor vuelva a cargar")
+
+
+
+
+#procesando la url
+class WebReader:
+    def read_web(self, url):  # Agregué un método para contener el bloque de código
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                titulos = []
+                for titulo in soup.find_all(['h1', 'h2']):
+                    if len(titulos) < 1:
+                        titulos.append(titulo.get_text())
+                    else:
+                        break
+                
+                titulo_limpio = re.sub('[^0-9a-zA-ZáéíóúÁÉÍÓÚñÑ\s-]+', '', titulos[0])
+                titulo_limpio = titulo_limpio.strip()
+                
+                elementos_parrafo = [p for p in soup.find_all('p') if not p.find('a')]
+                texto_completo = ''
+                for elemento in elementos_parrafo:
+                    texto_limpio = re.sub('[^0-9a-zA-ZáéíóúÁÉÍÓÚñÑ\s-]+', '', elemento.get_text())
+                    texto_completo += texto_limpio + '\n' 
+                    texto_completo = texto_completo.strip()[:7000]
+                
+                texto_final = """Del texto que te voy a enviar hacer un resumen con las conclusiones más importantes.
+                solo utilizar los párrafos que formen oraciones con sentido completo.
+                Debes responder en español.""" + titulo_limpio + " " + texto_completo
+                
+                # Aquí puedes continuar con tu lógica para llamar al API de OpenAI y procesar el resultado como prefieras.
+                # Ejemplo (debes reemplazarlo por tu código real para interactuar con el API de OpenAI):
+                # texto_ChatGPT = (completion(texto_final))
+                
+                #print("Resultado:\n", texto_final)  # Muestra el resultado por consola.
+                return texto_final
+            else:
+                print("URL inválida, por favor introduzca otra URL")
+        except Exception as e:
+            print("Ha ocurrido un error al procesar la url:", e)
