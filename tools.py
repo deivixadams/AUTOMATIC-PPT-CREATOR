@@ -8,10 +8,17 @@ from pptx import Presentation
 from pptx.util import Inches
 from datetime import datetime
 import json
+import openai
+import tools
+from langchain.chat_models import ChatOpenAI
+from langchain import PromptTemplate
+from langchain.llms import OpenAI
+from langchain.chains import LLMChain, SimpleSequentialChain
 
 
 API_KEY = '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'
 SERPER_KEY = 'e8644d7bc36c8d548e0a3e8813a8827d3083933f09fb742a784cbcce84e0f901'
+
 
 
 class LimpiaTexto:
@@ -19,6 +26,18 @@ class LimpiaTexto:
         pattern = re.compile('[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,?!¡¿ ]')
         texto_limpio = pattern.sub('', texto)
         return texto_limpio
+
+
+class openai_langchain:
+    def openai_lc(self):
+        self.llm = ChatOpenAI(
+            model_name="gpt-3.5-turbo",
+            openai_api_key= API_KEY,
+            temperature=1,
+            max_tokens=900,
+            model_kwargs={"top_p": 0.9, "frequency_penalty": 0.4}
+        )
+        return self.llm
 
 
 class InfoConverter:

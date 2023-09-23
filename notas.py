@@ -1,0 +1,1 @@
+After you make these changes, the error should be resolved. If API_KEY is confidential, make sure not to expose it in your code. Store it in environment variables or use a configuration file that is not included in your version control system (e.g., Git).
