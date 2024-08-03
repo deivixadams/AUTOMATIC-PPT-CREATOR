@@ -2,18 +2,13 @@
 import json
 import os
 import re
-import nltk
-from PyPDF2 import PdfReader # importamos la clase PdfReader
 from pptx import Presentation
 from pptx.util import Inches
 from datetime import datetime
 import json
 import openai
 import tools
-from langchain.chat_models import ChatOpenAI
-from langchain import PromptTemplate
-from langchain.llms import OpenAI
-from langchain.chains import LLMChain, SimpleSequentialChain
+from langchain_community.chat_models import ChatOpenAI
 import re
 import requests
 from bs4 import BeautifulSoup
@@ -89,6 +84,9 @@ class PresentationCreator:
         
         nombre_archivo = f"{fecha_hora}.pptx"
         ruta_guardado = os.path.join("RESULTADO", nombre_archivo)
+        if not os.path.exists("RESULTADO"):
+            os.makedirs("RESULTADO")
+
         try:
             prs.save(ruta_guardado)
             if os.path.exists(ruta_guardado):
