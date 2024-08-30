@@ -17,7 +17,7 @@ import uuid
 import requests
 
 os.environ["OPENAI_API_KEY"] = "sk-proj-HpGwwK5I8PuaYIDKezKXT3BlbkFJpq9tGYo4wcMnX7N9l4Gd"
-UNSPLASH_ACCESS_KEY = "a7rydcx5nPWZF6Hu_i9Wi1U_Pzu9bNWz7y4_-rwTwDM"
+PIXABAY_API_KEY = "45715592-51f10adb612126997b0608f39"
 
 app = FastAPI()
 
@@ -73,16 +73,18 @@ class Application:
         cadena = LLMChain(llm=self.llmlc.openai_lc(), prompt=prompt_template)
         return cadena.run({'tema': tema, 'cantidad': cantidad})
 
-    def get_image_url(self, query):
+    def get_image_urls(self, query, count):
         try:
-            url = f"https://api.unsplash.com/photos/random?query={query}&client_id={UNSPLASH_ACCESS_KEY}"
+            url = f"https://pixabay.com/api/?key={PIXABAY_API_KEY}&q={query}&image_type=photo&per_page={count}"
             response = requests.get(url)
-            response.raise_for_status()  # Esto lanzará una excepción si la solicitud no fue exitosa
+            response.raise_for_status()
             data = response.json()
-            return data['urls']['regular']
+            
+            images = [hit['webformatURL'] for hit in data['hits']]
+            return images
         except requests.RequestException as e:
-            print(f"Error al obtener la imagen de Unsplash: {e}")
-            return None
+            print(f"Error while fetching images from Pixabay: {e}")
+            return []
 
     def create_presentation(self, tema, cantidad):
         try:
@@ -90,10 +92,14 @@ class Application:
             dataslide = self.info_converter.convertir_info(info)
             dataslide = list(dataslide)[:cantidad]
 
-            for slide in dataslide:
-                image_url = self.get_image_url(tema)
-                if image_url:
-                    slide['image_url'] = image_url
+            image_urls = self.get_image_urls(tema, cantidad)
+            
+            for i, slide in enumerate(dataslide):
+
+                if i < len(image_urls):
+                    slide['image_url'] = image_urls[i]
+                else:
+                    slide['image_url'] = None
             
             filename = f"{uuid.uuid4()}.pptx"
             filepath = os.path.join("RESULTADO", filename)
